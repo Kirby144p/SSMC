@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "ssmc",
+	"version": "${version}",
+	"name": "SSMC",
+	"description": "Configurable chat message filter. Filters can perform certain actions.",
+	"authors": [
+		"Kirby144p"
+	],
+	"contact": {
+		"homepage": "https://github.com/Kirby144p/SSMC",
+		"sources": "https://github.com/Kirby144p/SSMC"
+	},
+	"license": "GPL-3.0-or-later",
+	"icon": "assets/ssmc/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"kirby144p.ssmc.SSMC"
+		],
+		"client": [
+			"kirby144p.ssmc.SSMCClient"
+		]
+	},
+	"mixins": [
+		"ssmc.mixins.json",
+		{
+			"config": "ssmc.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

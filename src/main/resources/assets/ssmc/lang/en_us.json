@@ -1,0 +1,25 @@
+{
+    "ssmc.copyright_notice": "Copyright (C) Kirby144p, no warranties.",
+    "ssmc.license_notice": "SSMC is distributed under the GNU General Public License v3.0 or later.",
+
+
+    "ssmc.chat_toast.title": "New chat message",
+
+    "ssmc.screen.chat.config_button": "SSMC",
+    "ssmc.screen.chat.config_button.tooltip": "Configure chat filters and actions.",
+
+    "ssmc.screen.config.add_button": "Add",
+    "ssmc.screen.config.confirm_remove_button": "Confirm",
+    "ssmc.screen.config.duplicate_button": "Duplicate",
+    "ssmc.screen.config.load_button": "Load",
+    "ssmc.screen.config.remove_button": "Remove",
+    "ssmc.screen.config.save_button": "Save",
+    "ssmc.screen.config.title": "Filter Config",
+
+    "ssmc.screen.setting.enabled": "Enabled",
+    "ssmc.screen.setting.filter_action": "Filter Action",
+    "ssmc.screen.setting.filter_pattern": "Filter Pattern",
+    "ssmc.screen.setting.filter_strategy": "Filter Strategy",
+    "ssmc.screen.setting.hide_message_from_chat": "Hide Message from Chat",
+    "ssmc.screen.setting.hide_message_from_log": "Hide Message from Log"
+}

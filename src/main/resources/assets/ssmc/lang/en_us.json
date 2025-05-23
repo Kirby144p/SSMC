@@ -1,4 +1,5 @@
 {
+    "ssmc.version": "SSMC v%s",
     "ssmc.copyright_notice": "Copyright (C) Kirby144p, no warranties.",
     "ssmc.license_notice": "SSMC is distributed under the GNU General Public License v3.0 or later.",
 

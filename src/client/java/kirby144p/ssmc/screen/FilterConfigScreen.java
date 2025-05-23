@@ -17,15 +17,19 @@
 
 package kirby144p.ssmc.screen;
 
+import kirby144p.ssmc.SSMC;
 import kirby144p.ssmc.SSMCClient;
 import kirby144p.ssmc.filter.ChatFilterConfig;
 import kirby144p.ssmc.screen.widget.ChatFilterListWidget;
+import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.PressableTextWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 
 public class FilterConfigScreen extends Screen {
 
@@ -37,8 +41,12 @@ public class FilterConfigScreen extends Screen {
     private static final Text DUPLICATE_BUTTON_TEXT = Text.translatable("ssmc.screen.config.duplicate_button");
     private static final Text REMOVE_BUTTON_TEXT = Text.translatable("ssmc.screen.config.remove_button");
     private static final Text CONFIRM_REMOVE_BUTTON_TEXT = Text.translatable("ssmc.screen.config.confirm_remove_button").formatted(Formatting.RED);
+    private static final Text VERSION_TEXT = Text.translatable("ssmc.version", SSMC.MOD_VERSION.getFriendlyString());
     private static final Text COPYRIGHT_NOTICE_TEXT = Text.translatable("ssmc.copyright_notice");
     private static final Text LICENSE_NOTICE_TEXT = Text.translatable("ssmc.license_notice");
+
+    private static final String REPOSITORY_URI = "https://github.com/Kirby144p/SSMC";
+    private static final String LICENSE_URI = "https://www.gnu.org/licenses/gpl-3.0.html#license-text";
 
     /** Common padding or margin. */
     protected static final int SPACER = 4;
@@ -120,13 +128,47 @@ public class FilterConfigScreen extends Screen {
         /* This resets the remove confirmation and disables the buttons which interact with the selected entry */
         this.list.setSelected(null);
 
-        /* Copyright and license notices */
-        final var copyrightNoticeText =  new TextWidget(COPYRIGHT_NOTICE_TEXT, this.textRenderer);
-        copyrightNoticeText.setPosition((this.width - this.textRenderer.getWidth(COPYRIGHT_NOTICE_TEXT)) / 2, this.height - this.textRenderer.fontHeight - 2);
+        /* Version, Copyright and license notices */
+        final var versionText =  new TextWidget(VERSION_TEXT, this.textRenderer);
+        versionText.setPosition(SPACER, this.height - (this.textRenderer.fontHeight + 2));
+        this.addDrawableChild(versionText);
+
+        final var copyrightNoticeText =  new PressableTextWidget(
+            this.width - (this.textRenderer.getWidth(COPYRIGHT_NOTICE_TEXT) + SPACER),
+            this.height - (this.textRenderer.fontHeight + 2),
+            this.textRenderer.getWidth(LICENSE_NOTICE_TEXT),
+            this.textRenderer.fontHeight,
+            COPYRIGHT_NOTICE_TEXT,
+            (button) -> {
+                this.client.setScreen(new ConfirmLinkScreen((confirmed) -> {
+                    if (confirmed) {
+                        Util.getOperatingSystem().open(REPOSITORY_URI);
+                    }
+
+                    this.client.setScreen(this);
+                    }, REPOSITORY_URI, false));
+            },
+            this.textRenderer
+        );
         this.addDrawableChild(copyrightNoticeText);
 
-        final var licenseNoticeText =  new TextWidget(LICENSE_NOTICE_TEXT, this.textRenderer);
-        licenseNoticeText.setPosition((this.width - this.textRenderer.getWidth(LICENSE_NOTICE_TEXT)) / 2, this.height - (textRenderer.fontHeight) * 2 - 4);
+        final var licenseNoticeText =  new PressableTextWidget(
+            (this.width - this.textRenderer.getWidth(LICENSE_NOTICE_TEXT)) / 2,
+            this.height - (this.textRenderer.fontHeight + 2) * 2,
+            this.textRenderer.getWidth(LICENSE_NOTICE_TEXT),
+            this.textRenderer.fontHeight,
+            LICENSE_NOTICE_TEXT,
+            (button) -> {
+                this.client.setScreen(new ConfirmLinkScreen((confirmed) -> {
+                    if (confirmed) {
+                        Util.getOperatingSystem().open(LICENSE_URI);
+                    }
+
+                    this.client.setScreen(this);
+                    }, LICENSE_URI, false));
+            },
+            this.textRenderer
+        );
         this.addDrawableChild(licenseNoticeText);
     }
 

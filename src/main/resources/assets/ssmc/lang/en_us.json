@@ -27,5 +27,6 @@
     "ssmc.screen.setting.filter_pattern": "Filter Pattern",
     "ssmc.screen.setting.filter_strategy": "Filter Strategy",
     "ssmc.screen.setting.hide_message_from_chat": "Hide Message from Chat",
-    "ssmc.screen.setting.hide_message_from_log": "Hide Message from Log"
+    "ssmc.screen.setting.hide_message_from_log": "Hide Message from Log",
+    "ssmc.screen.setting.hide_message_from_log.disabled_tooltip": "Cannot hide Message from Log when not hiding from Chat."
 }

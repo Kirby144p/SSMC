@@ -51,6 +51,7 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
     private static final Text FILTER_ACTION_TEXT = Text.translatable("ssmc.screen.setting.filter_action");
     private static final Text HIDE_FROM_CHAT_TEXT = Text.translatable("ssmc.screen.setting.hide_message_from_chat");
     private static final Text HIDE_FROM_LOG_TEXT = Text.translatable("ssmc.screen.setting.hide_message_from_log");
+    private static final Text HIDE_FROM_LOG_DISABLED_TOOLTIP = Text.translatable("ssmc.screen.setting.hide_message_from_log.disabled_tooltip");
 
     /** Common padding or margin. */
     protected static final int SPACER = 4;
@@ -235,20 +236,26 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
                 .build(FILTER_ACTION_TEXT, (button, value) -> {this.filter.Action(value);});
 
             /* Two checkboxes for hiding chat messages from the chat or the log */
-            this.shouldHideFromChat = CheckboxWidget.builder(HIDE_FROM_CHAT_TEXT, ChatFilterListWidget.this.client.textRenderer)
-                .checked(this.filter.HideFromChat())
-                .callback((checkbox, checked) -> {
-                    this.filter.HideFromChat(checked);
-                })
-                .tooltip(Tooltip.of(HIDE_FROM_CHAT_TEXT))
-                .build();
-
             this.shouldHideFromLog = CheckboxWidget.builder(HIDE_FROM_LOG_TEXT, ChatFilterListWidget.this.client.textRenderer)
                 .checked(this.filter.HideFromLog())
                 .callback((checkbox, checked) -> {
                     this.filter.HideFromLog(checked);
                 })
-                .tooltip(Tooltip.of(HIDE_FROM_LOG_TEXT))
+                .tooltip(Tooltip.of(this.filter.HideFromChat() ? HIDE_FROM_LOG_TEXT : HIDE_FROM_LOG_DISABLED_TOOLTIP))
+                .build();
+            
+            this.shouldHideFromLog.active = this.filter.HideFromChat();
+
+            this.shouldHideFromChat = CheckboxWidget.builder(HIDE_FROM_CHAT_TEXT, ChatFilterListWidget.this.client.textRenderer)
+                .checked(this.filter.HideFromChat())
+                .callback((checkbox, checked) -> {
+                    this.filter.HideFromChat(checked);
+
+                    /* Cannot hide message from log when not hiding from chat */
+                    this.shouldHideFromLog.active = checked;
+                    this.shouldHideFromLog.setTooltip(Tooltip.of(checked ? HIDE_FROM_LOG_TEXT : HIDE_FROM_LOG_DISABLED_TOOLTIP));
+                })
+                .tooltip(Tooltip.of(HIDE_FROM_CHAT_TEXT))
                 .build();
         }
 

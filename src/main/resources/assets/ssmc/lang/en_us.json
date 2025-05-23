@@ -5,6 +5,11 @@
 
     "ssmc.chat_toast.title": "New chat message",
 
+    "ssmc.config_toast.error.loading_config_file.title": "Error loading config file",
+    "ssmc.config_toast.error.saving_config_file.title": "Error saving config file",
+    "ssmc.config_toast.error.loading_config_file": "Could not load config file. See log for more information.",
+    "ssmc.config_toast.error.saving_config_file": "Could not save config file. See log for more information.",
+
     "ssmc.screen.chat.config_button": "SSMC",
     "ssmc.screen.chat.config_button.tooltip": "Configure chat filters and actions.",
 

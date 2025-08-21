@@ -438,6 +438,10 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             super.mouseClicked(mouseX, mouseY, button);
             if(selectable) {
+                /* Prevents crash when selecting an entry with the mouse and then using the arrow keys to navigate. */
+                this.setFocused(this.pattern);
+                this.pattern.setCursorToEnd(false);
+                
                 ChatFilterListWidget.this.setSelected(this);
             }
             return true;

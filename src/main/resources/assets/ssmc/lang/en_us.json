@@ -17,9 +17,12 @@
     "ssmc.screen.config.add_button": "Add",
     "ssmc.screen.config.confirm_remove_button": "Confirm",
     "ssmc.screen.config.duplicate_button": "Duplicate",
+    "ssmc.screen.config.hide_non_matching": "Hide non-matching Filters",
     "ssmc.screen.config.load_button": "Load",
     "ssmc.screen.config.remove_button": "Remove",
     "ssmc.screen.config.save_button": "Save",
+    "ssmc.screen.config.search": "Search through Filters",
+    "ssmc.screen.config.search_by_strategy": "Use Filter's Strategy",
     "ssmc.screen.config.title": "Filter Config",
 
     "ssmc.screen.setting.enabled": "Enabled",

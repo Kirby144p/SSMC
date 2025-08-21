@@ -23,8 +23,11 @@ import kirby144p.ssmc.filter.ChatFilterConfig;
 import kirby144p.ssmc.screen.widget.ChatFilterListWidget;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.PressableTextWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
@@ -41,6 +44,9 @@ public class FilterConfigScreen extends Screen {
     private static final Text DUPLICATE_BUTTON_TEXT = Text.translatable("ssmc.screen.config.duplicate_button");
     private static final Text REMOVE_BUTTON_TEXT = Text.translatable("ssmc.screen.config.remove_button");
     private static final Text CONFIRM_REMOVE_BUTTON_TEXT = Text.translatable("ssmc.screen.config.confirm_remove_button").formatted(Formatting.RED);
+    private static final Text SEARCH_TEXT = Text.translatable("ssmc.screen.config.search");
+    private static final Text SEARCH_BY_STRATEGY = Text.translatable("ssmc.screen.config.search_by_strategy");
+    private static final Text HIDE_NON_MATCHING_TEXT = Text.translatable("ssmc.screen.config.hide_non_matching");
     private static final Text VERSION_TEXT = Text.translatable("ssmc.version", SSMC.MOD_VERSION.getFriendlyString());
     private static final Text COPYRIGHT_NOTICE_TEXT = Text.translatable("ssmc.copyright_notice");
     private static final Text LICENSE_NOTICE_TEXT = Text.translatable("ssmc.license_notice");
@@ -53,6 +59,12 @@ public class FilterConfigScreen extends Screen {
 
     /** Width of the side buttons. */
     protected static final int SIDE_BUTTON_WIDTH = 60;
+
+    /** Height of a button. */
+    protected static final int BUTTON_HEIGHT = ButtonWidget.DEFAULT_HEIGHT;
+
+    /** Padded width of the side buttons. */
+    protected static final int SIDE_BUTTONS_PADDED_WIDTH = SIDE_BUTTON_WIDTH + 3*SPACER;
 
     private final Screen parent;
 
@@ -82,9 +94,51 @@ public class FilterConfigScreen extends Screen {
         var yOffset = 0;
 
         this.list = new ChatFilterListWidget(this.client,
-            SIDE_BUTTON_WIDTH + 3*SPACER, SPACER, this.width - SIDE_BUTTON_WIDTH - 5*SPACER, this.height - 2*this.textRenderer.fontHeight - 3*SPACER, 68 + 2*SPACER,
+            /* X */ SIDE_BUTTONS_PADDED_WIDTH,
+            /* Y */ SPACER + 2*(SPACER + BUTTON_HEIGHT),
+            /* W */ this.width - SIDE_BUTTON_WIDTH - 5*SPACER,
+            /* H */ this.height - 2*this.textRenderer.fontHeight - 3*SPACER - 2*(SPACER + BUTTON_HEIGHT),
+            68 + 2*SPACER,
             true, this.config
         );
+
+        /* Text field for searching */
+        final var search = new TextFieldWidget(
+            this.textRenderer,
+            0, 0, (int)(this.list.getWidth() * 0.7) - 2*(SPACER - BUTTON_HEIGHT), BUTTON_HEIGHT,
+            Text.empty()
+        );
+
+        search.setPosition(SIDE_BUTTONS_PADDED_WIDTH + (this.list.getWidth() - search.getWidth())/2, SPACER);
+        search.setChangedListener((value) -> this.list.search(value));
+        search.setMaxLength(512);
+        search.setTooltip(Tooltip.of(SEARCH_TEXT));
+
+        this.addDrawableChild(search);
+
+        /* Checkbox for searching using entry's strategy */
+        final var searchByStrategy = CheckboxWidget.builder(SEARCH_BY_STRATEGY, this.textRenderer)
+            .checked(false)
+            .callback((checkbox, checked) -> {
+                this.list.searchByStrategy(checked);
+            })
+            .tooltip(Tooltip.of(SEARCH_BY_STRATEGY))
+            .pos(SIDE_BUTTONS_PADDED_WIDTH, search.getHeight() + 2*SPACER)
+            .build();
+
+        this.addDrawableChild(searchByStrategy);
+
+        /* Checkbox for hiding non-matching entries */
+        final var hideNoneMatchingEntries = CheckboxWidget.builder(HIDE_NON_MATCHING_TEXT, this.textRenderer)
+            .checked(false)
+            .callback((checkbox, checked) -> {
+                this.list.hideNonMatching(checked);
+            })
+            .tooltip(Tooltip.of(HIDE_NON_MATCHING_TEXT))
+            .pos(SIDE_BUTTONS_PADDED_WIDTH + searchByStrategy.getWidth() + SPACER, search.getHeight() + 2*SPACER)
+            .build();
+
+        this.addDrawableChild(hideNoneMatchingEntries);
 
         this.addDrawableChild(new ButtonWidget.Builder(BACK_BUTTON_TEXT, (button) -> {this.close();})
             .dimensions(SPACER, yOffset += SPACER, SIDE_BUTTON_WIDTH, ButtonWidget.DEFAULT_HEIGHT)

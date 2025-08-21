@@ -19,7 +19,9 @@
 package kirby144p.ssmc.filter;
 
 import java.util.Objects;
+import java.util.regex.PatternSyntaxException;
 
+import kirby144p.ssmc.SSMC;
 import net.minecraft.text.Text;
 
 public class ChatFilter implements Cloneable {
@@ -52,7 +54,14 @@ public class ChatFilter implements Cloneable {
 
     public boolean isMatch(Text text) {
         String message = text.getString();
-        return strategy.isMatch(message, pattern);
+        boolean isMatch = false;
+        try {
+            isMatch = strategy.isMatch(message, pattern);
+        } catch (PatternSyntaxException pSEx) {
+            SSMC.LOGGER.warn("Could not process pattern '{}': {}", pattern, pSEx.getMessage());
+            this.Enabled(false);
+        }
+        return isMatch;
     }
 
     public void doAction(Text text) {

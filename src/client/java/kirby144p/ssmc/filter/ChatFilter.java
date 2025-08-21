@@ -52,11 +52,22 @@ public class ChatFilter implements Cloneable {
         this.hideFromLog = hideFromLog;       
     }
 
-    public boolean isMatch(Text text) {
-        String message = text.getString();
+    /**
+     * Checks whether this filter's pattern is valid by running a test match.
+     * @throws PatternSyntaxException If the pattern is invalid.
+     */
+    public void checkBroken() throws PatternSyntaxException {
+        strategy.isMatch("Check broken test", pattern);
+    }
+
+    /**
+     * Returns whether this filter matches the specified text.
+     * @param text  The text to match against.
+     */
+    public boolean isMatch(String text) {
         boolean isMatch = false;
         try {
-            isMatch = strategy.isMatch(message, pattern);
+            isMatch = strategy.isMatch(text, pattern);
         } catch (PatternSyntaxException pSEx) {
             SSMC.LOGGER.warn("Could not process pattern '{}': {}", pattern, pSEx.getMessage());
             this.Enabled(false);
@@ -64,6 +75,18 @@ public class ChatFilter implements Cloneable {
         return isMatch;
     }
 
+    /**
+     * Returns whether this filter matches the specified text.
+     * @param text  The text to match against.
+     */
+    public boolean isMatch(Text text) {
+        return this.isMatch(text.getString());
+    }
+
+    /**
+     * Calls this filter's action on the specified text, e.g. show text in action bar.
+     * @param text  The text on which the action should be called.
+     */
     public void doAction(Text text) {
         this.action.doAction(text);
     }

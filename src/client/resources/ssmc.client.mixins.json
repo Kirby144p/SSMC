@@ -3,6 +3,7 @@
 	"package": "kirby144p.ssmc.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"ChatOptionsScreenMixin",
 		"ChatScreenMixin"
 	],
 	"injectors": {

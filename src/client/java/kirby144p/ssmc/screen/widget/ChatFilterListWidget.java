@@ -200,6 +200,8 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
         public Entry(ChatFilter filter) {
             this.filter = filter;
 
+            // TODO: Add indicator that filter matches text in text field
+
             /* Checkbox for enabled status */
             this.enabled = CheckboxWidget.builder(ENABLED_TEXT, ChatFilterListWidget.this.client.textRenderer)
                 .checked(this.filter.Enabled())
@@ -281,6 +283,10 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
 
             this.shouldHideFromLog.setX(xOffset + this.shouldHideFromChat.getWidth() + SPACER);
             this.shouldHideFromLog.setY(yOffset);
+
+            // Alternating background color
+            int backgroundColor = index % 2 == 0 ? 0x20FFFFFF : 0x60000000;
+            context.fill(getRowLeft() - 1, y - 1, getRowRight() + 1, y + entryHeight + 1, backgroundColor);
 
             this.pattern.render(context, mouseX, mouseY, tickDelta);
             this.enabled.render(context, mouseX, mouseY, tickDelta);

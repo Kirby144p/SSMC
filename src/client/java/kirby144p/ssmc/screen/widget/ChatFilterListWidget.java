@@ -17,9 +17,11 @@
 
 package kirby144p.ssmc.screen.widget;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.regex.PatternSyntaxException;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -68,6 +70,15 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
     /** A consumer which gets called when an entry is selected. */
     private Consumer<@Nullable Entry> selectedConsumer;
 
+    /** The current search query. */
+    private String query;
+
+    /** Whether to search using the filter's strategy. */
+    private boolean searchByStrategy;
+
+    /** Whether to hide non-matching filters. */
+    private boolean hideNonMatchingEntries;
+
     public ChatFilterListWidget(MinecraftClient minecraftClient, int x, int y, int width, int height, int itemHeight, boolean selectable, ChatFilterConfig config) {
         super(minecraftClient, width, height, y, itemHeight);
         setX(x);
@@ -76,10 +87,15 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
 
         this.config = config;
 
-        final var filters = config.ChatFilters();
-        for (var filter : filters) {
-            this.addEntry(new Entry(filter));
-        }
+        this.selectedConsumer = null;
+
+        this.query = null;
+
+        this.searchByStrategy = false;
+
+        this.hideNonMatchingEntries = false;
+
+        initEntries();
     }
 
     public boolean isScrollbarVisible() {
@@ -117,7 +133,9 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
     @Override
     public void setSelected(@Nullable Entry entry) {
         super.setSelected(entry);
-        this.selectedConsumer.accept(entry);
+        if (this.selectedConsumer != null) {
+            this.selectedConsumer.accept(entry);
+        }
     }
 
     /**
@@ -136,6 +154,80 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
     protected void drawSelectionHighlight(DrawContext context, int y, int entryWidth, int entryHeight, int borderColor, int fillColor) {
         context.fill(getRowLeft() - 2, y - 2, getRowRight() + 2, y + entryHeight + 2, borderColor);
         context.fill(getRowLeft() - 1, y - 1, getRowRight() + 1, y + entryHeight + 1, fillColor);
+    }
+
+    /**
+     * Fills this list with all filters from the config.
+     */
+    private void initEntries() {
+        this.clearEntries();
+        this.setSelected(null);
+        final var filters = this.config.ChatFilters();
+        for (var filter : filters) {
+            this.addEntry(new Entry(filter));
+        }
+    }
+
+    /**
+     * Updates this list considering the serach query, wether to search using the filter's strategy and whether to hide non-matching filters.
+     */
+    private void updateList() {
+        initEntries();
+        if (query == null || query.isBlank()) {
+            /* Lowlight/show all entries */
+            /* List already reinitialized */
+        } else {
+            /* Highlight/show only matching entries */
+            final var toRemove = new LinkedList<Entry>();
+            for (var entry : this.children()) {
+                if (entry.matchesQuery(query, searchByStrategy)) {
+                    /* Entry matches */
+                    if (this.hideNonMatchingEntries) {
+                        /* Do nothing */
+                    } else {
+                        entry.Highlight(true);
+                    }
+                } else {
+                    /* Entry does not match */
+                    if (this.hideNonMatchingEntries) {
+                        toRemove.add(entry);
+                    } else {
+                        entry.Highlight(false);
+                    }
+                }
+            }
+
+            for (int i = 0; i < toRemove.size(); i++) {
+                this.removeEntry(toRemove.get(i));
+                toRemove.remove(i);
+                i--;
+            }
+        }
+    }
+
+    /**
+     * Allows searching for entries in the list by hiding non-matching entries.
+     * @param query The query to search for.
+     */
+    public void search(String query) {
+        this.query = query;
+        updateList();
+    }
+
+    /**
+     * Determines whether to search by using the entry's filter strategy.
+     */
+    public void searchByStrategy(boolean searchByStrategy) {
+        this.searchByStrategy = searchByStrategy;
+        updateList();
+    }
+
+    /**
+     * Determines whether to hide non-matching entries or only highlight matching entries.
+     */
+    public void hideNonMatching(boolean hide) {
+        this.hideNonMatchingEntries = hide;
+        updateList();
     }
 
     /**
@@ -189,6 +281,8 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
     @Environment(value=EnvType.CLIENT)
     public class Entry extends ElementListWidget.Entry<Entry> {
         private final ChatFilter filter;
+        private boolean highlight;
+        private boolean broken;
 
         private final CheckboxWidget enabled;
         private final TextFieldWidget pattern;
@@ -199,8 +293,25 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
 
         public Entry(ChatFilter filter) {
             this.filter = filter;
+            this.highlight = false;
 
-            // TODO: Add indicator that filter matches text in text field
+            /* Text field for pattern */
+            this.pattern = new TextFieldWidget(
+                ChatFilterListWidget.this.client.textRenderer,
+                0, 0, 100, ButtonWidget.DEFAULT_HEIGHT,
+                Text.literal(this.filter.Pattern())
+            );
+
+            this.pattern.setChangedListener((value) -> {
+                this.filter.Pattern(value);
+                this.checkBroken();
+            });
+            this.pattern.setMaxLength(512);
+            this.pattern.setText(this.filter.Pattern());
+            this.pattern.setTooltip(Tooltip.of(FILTER_PATTERN_TEXT));
+
+            /* Fix first few letters of text being cut off */
+            this.pattern.setCursorToStart(false);
 
             /* Checkbox for enabled status */
             this.enabled = CheckboxWidget.builder(ENABLED_TEXT, ChatFilterListWidget.this.client.textRenderer)
@@ -210,21 +321,6 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
                 })
                 .tooltip(Tooltip.of(ENABLED_TEXT))
                 .build();
-
-            /* Text field for pattern */
-            this.pattern = new TextFieldWidget(
-                ChatFilterListWidget.this.client.textRenderer,
-                0, 0, 100, ButtonWidget.DEFAULT_HEIGHT,
-                Text.literal(this.filter.Pattern())
-            );
-
-            this.pattern.setChangedListener((value) -> this.filter.Pattern(value));
-            this.pattern.setMaxLength(512);
-            this.pattern.setText(this.filter.Pattern());
-            this.pattern.setTooltip(Tooltip.of(FILTER_PATTERN_TEXT));
-
-            /* Fix first few letters of text being cut off */
-            this.pattern.setCursorToStart(false);
 
             /* Two cycling buttons for switching between the different filter strategies and actions */
             this.strategy = CyclingButtonWidget.<FilterStrategy>builder((value) -> {return Text.literal(value.toString());})
@@ -284,9 +380,21 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
             this.shouldHideFromLog.setX(xOffset + this.shouldHideFromChat.getWidth() + SPACER);
             this.shouldHideFromLog.setY(yOffset);
 
-            // Alternating background color
-            int backgroundColor = index % 2 == 0 ? 0x20FFFFFF : 0x60000000;
+            /* Alternating background color */
+            final int backgroundColor = index % 2 == 0 ? 0x20FFFFFF : 0x60000000;
             context.fill(getRowLeft() - 1, y - 1, getRowRight() + 1, y + entryHeight + 1, backgroundColor);
+
+            /* Highlight */
+            if (this.Highlight()) {
+                final int highlightColor = 0xF055FF55;
+                context.fill(getRowLeft() - 3, y - 1, getRowLeft() - 1, y + entryHeight + 1, highlightColor);
+            }
+
+            /* Broken highlight */
+            if (this.broken) {
+                final int brokenHighlightColor = 0x40FF5555;
+                context.fill(getRowLeft() - 2, y - 2, getRowRight() + 2, y + entryHeight + 2, brokenHighlightColor);
+            }
 
             this.pattern.render(context, mouseX, mouseY, tickDelta);
             this.enabled.render(context, mouseX, mouseY, tickDelta);
@@ -335,8 +443,43 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
             return true;
         }
 
+        /**
+         * Checks whether this entry's filter is broken, sets the respective flag and disables the filter if it is broken.
+         */
+        private void checkBroken() {
+            try {
+                this.filter.checkBroken();
+
+                if (this.broken) {
+                    this.broken = false;
+                    this.pattern.setTooltip(Tooltip.of(FILTER_PATTERN_TEXT));
+                }
+            } catch (PatternSyntaxException pSEx) {
+                this.broken = true;
+                this.filter.Enabled(false);
+                this.pattern.setTooltip(Tooltip.of(Text.of(pSEx.getLocalizedMessage())));
+            }
+        }
+
+        /**
+         * Returns whether this entry's filter matches the query.
+         * @param query             The query to match against.
+         * @param searchByStrategy  Whether to match using the filter's strategy.
+         */
+        public boolean matchesQuery(String query, boolean searchByStrategy) {
+            return searchByStrategy && !this.broken ? this.ChatFilter().isMatch(query) : this.ChatFilter().Pattern().contains(query);
+        }
+
         public ChatFilter ChatFilter() {
             return this.filter;
+        }
+
+        public boolean Highlight() {
+            return this.highlight;
+        }
+
+        public void Highlight(boolean newHighlight) {
+            this.highlight = newHighlight;
         }
     }
 }

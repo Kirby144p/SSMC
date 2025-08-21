@@ -219,7 +219,7 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
             );
 
             this.pattern.setChangedListener((value) -> this.filter.Pattern(value));
-            this.pattern.setMaxLength(64);
+            this.pattern.setMaxLength(512);
             this.pattern.setText(this.filter.Pattern());
             this.pattern.setTooltip(Tooltip.of(FILTER_PATTERN_TEXT));
 

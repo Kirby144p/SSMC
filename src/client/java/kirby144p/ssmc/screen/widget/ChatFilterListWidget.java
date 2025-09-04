@@ -440,7 +440,6 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
             if(selectable) {
                 /* Prevents crash when selecting an entry with the mouse and then using the arrow keys to navigate. */
                 this.setFocused(this.pattern);
-                this.pattern.setCursorToEnd(false);
                 
                 ChatFilterListWidget.this.setSelected(this);
             }

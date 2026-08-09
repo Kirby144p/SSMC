@@ -98,6 +98,10 @@ public class ChatFilterListWidget extends ElementListWidget<kirby144p.ssmc.scree
         initEntries();
     }
 
+    /**
+     * The scrollbar is only visible if the height of all entries
+     * combined plus the header is greater than the height of the widget.
+     */
     public boolean isScrollbarVisible() {
         return this.overflows();
     }

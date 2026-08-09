@@ -1,0 +1,34 @@
+{
+	"folders": [
+		{
+			"name": "Config",
+			"path": "run/config"
+		},
+		{
+			"name": "Main Code",
+			"path": "src/main/java/kirby144p/ssmc"
+		},
+		{
+			"name": "Client Code",
+			"path": "src/client/java/kirby144p/ssmc"
+		},
+		{
+			"name": "Ressources",
+			"path": "src/main/resources"
+		},
+		{
+			"name": "Build",
+			"path": "build/libs"
+		},
+		{
+			"name": "Dev Build",
+			"path": "build/devlibs"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
+}
